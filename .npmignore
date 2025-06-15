@@ -1,0 +1,29 @@
+# Source files
+src/
+examples/
+
+# Development files
+.git/
+.gitignore
+.eslintrc
+jest.config.js
+tsconfig.json
+
+# Test files
+__tests__/
+coverage/
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment files
+.env*
+.env
+
+# Build files
+*.tsbuildinfo
+
+# Documentation
+README.md
+LICENSE 
