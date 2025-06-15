@@ -38,7 +38,52 @@ interface XRocketPayConfig {
 
 ## Available Methods
 
-### `getVersion()`
+### Invoice Methods
+
+#### `createInvoice(data: CreateInvoiceDto)`
+
+Creates a new invoice for payment.
+
+```typescript
+const invoice = await client.createInvoice({
+  amount: 0.1,
+  currency: 'TONCOIN',
+  description: '1 Plush Pepe',
+  numPayments: 1,
+  expiredIn: 3600 // 1 hour
+});
+```
+
+#### `getInvoice(invoiceId: string)`
+
+Retrieves information about a specific invoice.
+
+```typescript
+const invoice = await client.getInvoice('invoice-id');
+```
+
+#### `getInvoices(params?: PaginationParams)`
+
+Lists all invoices with optional pagination.
+
+```typescript
+const invoices = await client.getInvoices({
+  limit: 10,
+  offset: 0
+});
+```
+
+#### `deleteInvoice(invoiceId: string)`
+
+Deletes an existing invoice.
+
+```typescript
+await client.deleteInvoice('invoice-id');
+```
+
+### Other Methods
+
+#### `getVersion()`
 
 Returns the current API version. This endpoint can be used as a healthcheck and doesn't require authentication.
 
@@ -47,22 +92,21 @@ const version = await client.getVersion();
 console.log(version.version); // e.g., "1.3.1"
 ```
 
-### `setApiKey(apiKey: string)`
+## Examples
 
-Updates the API key for authenticated requests.
+The SDK includes several example files demonstrating different use cases. You can find them in the `examples` directory:
 
-```typescript
-client.setApiKey('your-new-api-key');
-```
+- `create-invoice.ts` - Creating single-payment invoices
+- `get-invoice.ts` - Retrieving invoice information
+- `list-invoices.ts` - Listing and filtering invoices
+- `delete-invoice.ts` - Deleting invoices
+- `webhook-express-server.ts` - Setting up a webhook server with Express
 
-### `getConfig()`
+To run an example:
 
-Returns the current client configuration (API key is masked for security).
-
-```typescript
-const config = client.getConfig();
-console.log(config);
-// { baseUrl: 'https://pay.xrocket.tg/', apiKey: '***', timeout: 30000 }
+```bash
+# Run the create invoice example
+npm run example:invoice
 ```
 
 ## Error Handling
