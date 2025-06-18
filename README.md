@@ -1,12 +1,19 @@
 # xRocket Pay API SDK
 
-A TypeScript SDK for the xRocket Pay API. This library provides a simple and type-safe way to interact with the xRocket Pay API.
+A TypeScript SDK for the xRocket Pay API from https://t.me/xrocket bot. This library provides a simple and type-safe way to interact with the API.
 
 ## Installation
 
 ```bash
 npm install xrocket-pay-api-sdk
 ```
+
+## Resources
+
+- **xRocket Bot**: [@xrocket](http://t.me/xrocket) - The xRocket bot where you can get your API key and manage your app
+- **API Documentation**: [Swagger UI](https://pay.xrocket.tg/api#/) - Interactive API documentation
+- **OpenAPI Schema**: [JSON Schema](https://pay.xrocket.tg/api-json) - Complete API specification
+- **Examples**: [GitHub Examples](https://github.com/xrocket-tg/xrocket-pay-ts-sdk/tree/master/examples) - Complete working examples
 
 ## Quick Start
 
@@ -241,17 +248,6 @@ currencies.data.results.forEach(currency => {
 });
 ```
 
-The response includes:
-- **Currency information**: ID, name, and display name
-- **Minimum amounts**: For transfers, cheques, invoices, and withdrawals
-- **Withdrawal fees**: Network-specific fees for different withdrawal networks (TON, BSC, ETH, BTC, TRX, SOL)
-
-This is useful for:
-- Validating amounts before creating invoices or transfers
-- Displaying available currencies to users
-- Calculating withdrawal fees for different networks
-- Building currency selection interfaces
-
 ## Withdrawal Methods
 
 ### Create Withdrawal
@@ -323,7 +319,7 @@ while (Date.now() - startTime < pollTimeout) {
 
 ## Examples
 
-See the `examples` directory for complete working examples:
+See the [`examples`](https://github.com/xrocket-tg/xrocket-pay-ts-sdk/tree/master/examples) directory for complete working examples:
 
 - `create-invoice.ts` - Creating single-payment invoices with various options
 - `get-invoice.ts` - Getting invoice information and monitoring payments in real-time
@@ -348,6 +344,10 @@ MIT
 ## Contributing
 
 This is a basic setup for the SDK. More endpoints and functionality will be added in future versions.
+
+## GitHub Repository
+
+The source code for this SDK is available on GitHub: [xrocket-pay-ts-sdk](https://github.com/xrocket-tg/xrocket-pay-ts-sdk)
 
 ## API Reference
 

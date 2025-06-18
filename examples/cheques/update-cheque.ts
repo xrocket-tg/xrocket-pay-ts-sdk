@@ -49,7 +49,8 @@ async function main() {
     console.log('Link:', updatedCheque.data.link);
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'response' in error) {
-      console.error('API Error:', (error as any).response.data);
+      // @ts-expect-error: dynamic error shape from Axios
+      console.error('API Error:', error.response.data);
     } else {
       console.error('Error updating cheque:', error);
     }
