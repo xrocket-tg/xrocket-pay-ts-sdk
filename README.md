@@ -81,6 +81,86 @@ Deletes an existing invoice.
 await client.deleteInvoice('invoice-id');
 ```
 
+### Cheque Methods
+
+**Note**: While xRocket Pay does not support personal cheques for users explicitly, you can easily create personal cheques for users using multi-cheque and setting `usersNumber` to 1. This allows you to create individual cheque links for specific users.
+
+```typescript
+// Create a personal cheque for a single user
+const personalCheque = await client.createMulticheque({
+  amount: 0.05,
+  currency: 'TONCOIN',
+  description: 'Personal reward for user',
+  chequePerUser: 0.05,
+  usersNumber: 1, // Single user cheque
+  refProgram: 0
+});
+```
+
+#### `createMulticheque(data: CreateChequeDto)`
+
+Creates a new multicheque for distributing crypto to users. Multicheques allow you to create a payment link that multiple users can use to receive cryptocurrency.
+
+```typescript
+const cheque = await client.createMulticheque({
+  amount: 0.1,
+  currency: 'TONCOIN',
+  description: 'Airdrop distribution',
+  chequePerUser: 0.01,
+  usersNumber: 10,
+  refProgram: 0,
+  enableCaptcha: true,
+  password: 'secure-password',
+  sendNotifications: true
+});
+```
+
+#### `getMulticheque(chequeId: number)`
+
+Retrieves information about a specific multicheque.
+
+```typescript
+const cheque = await client.getMulticheque(12345);
+console.log('Cheque description:', cheque.data.description);
+console.log('Total amount to distribute:', cheque.data.amount);
+console.log('Amount distributed so far:', cheque.data.collectedAmount);
+console.log('Cheque link for users:', cheque.data.link);
+```
+
+#### `getMulticheques(params?: PaginationParams)`
+
+Lists all multicheques with optional pagination.
+
+```typescript
+const cheques = await client.getMulticheques({
+  limit: 10,
+  offset: 0
+});
+console.log('Total cheques:', cheques.data.total);
+console.log('Cheques:', cheques.data.results);
+```
+
+#### `updateMulticheque(chequeId: number, data: UpdateChequeDto)`
+
+Updates an existing multicheque.
+
+```typescript
+const updatedCheque = await client.updateMulticheque(12345, {
+  description: 'Updated airdrop description',
+  enableCaptcha: false,
+  password: 'new-password',
+  sendNotifications: false
+});
+```
+
+#### `deleteMulticheque(chequeId: number)`
+
+Deletes an existing multicheque.
+
+```typescript
+await client.deleteMulticheque(12345);
+```
+
 ### Other Methods
 
 #### `getVersion()`
@@ -134,6 +214,43 @@ console.log(result);
 
 #### Note on `transferId`:
 The `transferId` is a unique identifier for each transfer. It helps prevent double spends by ensuring that the same transfer is not processed multiple times. You should generate a unique `transferId` for each transfer request. If a transfer with the same `transferId` is attempted, the API will reject it to prevent duplicate transactions.
+
+### Currency Methods
+
+#### `getAvailableCurrencies()`
+
+Returns a list of all available currencies with their minimum amounts and withdrawal fees. This endpoint doesn't require authentication.
+
+```typescript
+const currencies = await client.getAvailableCurrencies();
+console.log('Available currencies:', currencies.data.results.length);
+
+currencies.data.results.forEach(currency => {
+  console.log(`${currency.name} (${currency.currency})`);
+  console.log(`  Min Transfer: ${currency.minTransfer}`);
+  console.log(`  Min Cheque: ${currency.minCheque}`);
+  console.log(`  Min Invoice: ${currency.minInvoice}`);
+  console.log(`  Min Withdraw: ${currency.minWithdraw}`);
+  
+  if (currency.feeWithdraw) {
+    console.log('  Withdraw Fees:');
+    currency.feeWithdraw.networks.forEach(network => {
+      console.log(`    ${network.networkCode}: ${network.feeWithdraw.fee} ${network.feeWithdraw.currency}`);
+    });
+  }
+});
+```
+
+The response includes:
+- **Currency information**: ID, name, and display name
+- **Minimum amounts**: For transfers, cheques, invoices, and withdrawals
+- **Withdrawal fees**: Network-specific fees for different withdrawal networks (TON, BSC, ETH, BTC, TRX, SOL)
+
+This is useful for:
+- Validating amounts before creating invoices or transfers
+- Displaying available currencies to users
+- Calculating withdrawal fees for different networks
+- Building currency selection interfaces
 
 ## Withdrawal Methods
 
@@ -214,6 +331,12 @@ See the `examples` directory for complete working examples:
 - `delete-invoice.ts` - Deleting invoices and handling responses
 - `webhook-express-server.ts` - Setting up a webhook server with Express to receive payment notifications
 - `get-app-info.ts` - Retrieving application information and settings
+- `get-available-currencies.ts` - Getting list of available currencies with minimum amounts and fees
+- `create-cheque.ts` - Creating multicheques for distributing crypto to users
+- `get-cheque.ts` - Getting multicheque information and monitoring distributions
+- `list-cheques.ts` - Listing and filtering multicheques with pagination
+- `update-cheque.ts` - Updating multicheque settings and properties
+- `delete-cheque.ts` - Deleting multicheques and handling responses
 - `create-transfer.ts` - Creating transfers between accounts
 - `withdrawal.ts` - Creating and monitoring withdrawals with status polling
 - `check-withdrawal-status.ts` - Checking status of existing withdrawals
