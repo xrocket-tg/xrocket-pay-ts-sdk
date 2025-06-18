@@ -14,4 +14,7 @@ export * from './webhook';
 export * from './app';
 
 // Multicheque types
-export * from './multicheque'; 
+export * from './multicheque';
+
+// Currencies types
+export * from './currencies'; 

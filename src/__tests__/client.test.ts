@@ -128,6 +128,103 @@ describe('XRocketPayClient', () => {
     });
   });
 
+  describe('getAvailableCurrencies', () => {
+    it('should return available currencies data successfully', async () => {
+      const mockCurrenciesData = {
+        success: true,
+        data: {
+          results: [
+            {
+              currency: 'TONCOIN',
+              name: 'TON',
+              minTransfer: 0.001,
+              minCheque: 0.001,
+              minInvoice: 0.001,
+              minWithdraw: 0.001,
+              feeWithdraw: {
+                currency: 'TONCOIN',
+                networks: [
+                  {
+                    networkCode: 'TON',
+                    feeWithdraw: {
+                      fee: 0.01,
+                      currency: 'TONCOIN'
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              currency: 'BTC',
+              name: 'Bitcoin',
+              minTransfer: 0.0001,
+              minCheque: 0.0001,
+              minInvoice: 0.0001,
+              minWithdraw: 0.0001,
+              feeWithdraw: {
+                currency: 'BTC',
+                networks: [
+                  {
+                    networkCode: 'BTC',
+                    feeWithdraw: {
+                      fee: 0.0001,
+                      currency: 'BTC'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCurrenciesData });
+
+      const result = await client.getAvailableCurrencies();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/currencies/available');
+      expect(result).toEqual(mockCurrenciesData);
+      expect(result.data.results).toHaveLength(2);
+      expect(result.data.results[0].currency).toBe('TONCOIN');
+      expect(result.data.results[1].currency).toBe('BTC');
+    });
+
+    it('should handle API errors', async () => {
+      const mockError = new Error('Network error');
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getAvailableCurrencies()).rejects.toThrow('Network error');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/currencies/available');
+    });
+
+    it('should handle axios errors with response', async () => {
+      const mockError = {
+        response: {
+          status: 500,
+          data: { success: false, message: 'Internal server error' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getAvailableCurrencies()).rejects.toMatchObject(mockError);
+    });
+
+    it('should handle empty results', async () => {
+      const mockCurrenciesData = {
+        success: true,
+        data: {
+          results: []
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCurrenciesData });
+
+      const result = await client.getAvailableCurrencies();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/currencies/available');
+      expect(result).toEqual(mockCurrenciesData);
+      expect(result.data.results).toHaveLength(0);
+    });
+  });
+
   describe('setApiKey', () => {
     it('should update API key in headers', () => {
       const newApiKey = 'new-test-key';

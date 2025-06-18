@@ -23,7 +23,8 @@
     "example:withdrawal:create": "ts-node examples/withdrawals/withdrawal.ts",
     "example:withdrawal:status": "ts-node examples/withdrawals/check-withdrawal-status.ts",
     "example:withdrawal:fees": "ts-node examples/withdrawals/get-withdrawal-fees.ts",
-    "example:app:info": "ts-node examples/app/get-app-info.ts"
+    "example:app:info": "ts-node examples/app/get-app-info.ts",
+    "example:app:currencies": "ts-node examples/app/get-available-currencies.ts"
   },
   "keywords": [
     "xrocket",

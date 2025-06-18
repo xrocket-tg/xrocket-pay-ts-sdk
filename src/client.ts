@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Version, XRocketPayConfig, CreateInvoiceDto, CreateInvoiceResponse, GetInvoiceResponse, DeleteResponse, PaginationParams, ListInvoicesResponse, AppInfoResponse } from './types';
 import { CreateTransferDto, AppTransferResponse, WithdrawalFeesDto, WithdrawalFeesResponse, CreateWithdrawalDto, AppWithdrawalResponse, WithdrawalStatusDto, WithdrawalStatusResponse } from './types/app';
 import { CreateChequeDto, SimpleChequeResponse, UpdateChequeDto, PaginatedShortChequeDtoResponse } from './types/multicheque';
+import { AvailableCoinsResponse } from './types/currencies';
 
 /**
  * XRocket Pay API Client
@@ -35,6 +36,18 @@ export class XRocketPayClient {
    */
   async getVersion(): Promise<Version> {
     const response = await this.httpClient.get<Version>('/version');
+    return response.data;
+  }
+
+  /**
+   * Get available currencies
+   * No authentication required.
+   * 
+   * @returns Promise<AvailableCoinsResponse> The available currencies data
+   * @throws {Error} When request fails
+   */
+  async getAvailableCurrencies(): Promise<AvailableCoinsResponse> {
+    const response = await this.httpClient.get<AvailableCoinsResponse>('/currencies/available');
     return response.data;
   }
 
