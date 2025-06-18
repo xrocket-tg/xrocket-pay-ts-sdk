@@ -9,3 +9,6 @@ export * from './invoice';
 
 // Webhook types
 export * from './webhook'; 
+
+// App types
+export * from './app'; 

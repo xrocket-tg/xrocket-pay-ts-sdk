@@ -509,4 +509,264 @@ describe('XRocketPayClient', () => {
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/tg-invoices/12345');
     });
   });
+
+  describe('getAppInfo', () => {
+    it('should get app info successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockAppInfoResponse = {
+        success: true,
+        data: {
+          name: 'Test App',
+          feePercents: 1.5,
+          balances: [
+            {
+              currency: 'TONCOIN',
+              balance: 10.5
+            },
+            {
+              currency: 'BTC',
+              balance: 0.1
+            }
+          ]
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockAppInfoResponse });
+
+      const result = await client.getAppInfo();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/info');
+      expect(result).toEqual(mockAppInfoResponse);
+      expect(result.data?.balances).toHaveLength(2);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+
+      await expect(client.getAppInfo()).rejects.toThrow(
+        'API key is required for getting app info. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.get).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when getting app info', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = {
+        response: {
+          status: 401,
+          data: { success: false, message: 'Unauthorized' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getAppInfo()).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/info');
+    });
+
+    it('should handle network errors when getting app info', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getAppInfo()).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/info');
+    });
+
+    it('should handle app with no balances', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockAppInfoResponse = {
+        success: true,
+        data: {
+          name: 'New App',
+          feePercents: 0,
+          balances: []
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockAppInfoResponse });
+
+      const result = await client.getAppInfo();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/info');
+      expect(result).toEqual(mockAppInfoResponse);
+      expect(result.data?.balances).toHaveLength(0);
+    });
+  });
+
+  describe('createTransfer', () => {
+    it('should create a transfer successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const transferData = {
+        tgUserId: 123456789,
+        currency: 'TONCOIN',
+        amount: 1.23,
+        transferId: 'unique-transfer-id',
+        description: 'Test transfer',
+      };
+      const mockTransferResponse = {
+        success: true,
+        data: {
+          id: 1,
+          tgUserId: 123456789,
+          currency: 'TONCOIN',
+          amount: 1.23,
+          description: 'Test transfer',
+        }
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockTransferResponse });
+
+      const result = await client.createTransfer(transferData);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/app/transfer', transferData);
+      expect(result).toEqual(mockTransferResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+      const transferData = {
+        tgUserId: 123456789,
+        currency: 'TONCOIN',
+        amount: 1.23,
+        transferId: 'unique-transfer-id',
+      };
+
+      await expect(client.createTransfer(transferData)).rejects.toThrow(
+        'API key is required for creating transfers. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when creating transfer', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const transferData = {
+        tgUserId: 123456789,
+        currency: 'TONCOIN',
+        amount: 1.23,
+        transferId: 'unique-transfer-id',
+      };
+      const mockError = {
+        response: {
+          status: 400,
+          data: { success: false, message: 'Bad Request' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+
+      await expect(client.createTransfer(transferData)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/app/transfer', transferData);
+    });
+
+    it('should handle network errors when creating transfer', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const transferData = {
+        tgUserId: 123456789,
+        currency: 'TONCOIN',
+        amount: 1.23,
+        transferId: 'unique-transfer-id',
+      };
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+
+      await expect(client.createTransfer(transferData)).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/app/transfer', transferData);
+    });
+  });
+
+  describe('getWithdrawalFees', () => {
+    it('should get withdrawal fees for all currencies successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockFeesResponse = {
+        success: true,
+        data: [
+          {
+            code: 'TONCOIN',
+            minWithdraw: 0.1,
+            fees: [
+              {
+                networkCode: 'TON',
+                feeWithdraw: {
+                  fee: 0.01,
+                  currency: 'TONCOIN'
+                }
+              }
+            ]
+          },
+          {
+            code: 'BTC',
+            minWithdraw: 0.001,
+            fees: [
+              {
+                networkCode: 'BTC',
+                feeWithdraw: {
+                  fee: 0.0001,
+                  currency: 'BTC'
+                }
+              }
+            ]
+          }
+        ]
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockFeesResponse });
+
+      const result = await client.getWithdrawalFees();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/withdrawal/fees');
+      expect(result).toEqual(mockFeesResponse);
+    });
+
+    it('should get withdrawal fees for specific currency successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockFeesResponse = {
+        success: true,
+        data: [
+          {
+            code: 'TONCOIN',
+            minWithdraw: 0.1,
+            fees: [
+              {
+                networkCode: 'TON',
+                feeWithdraw: {
+                  fee: 0.01,
+                  currency: 'TONCOIN'
+                }
+              }
+            ]
+          }
+        ]
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockFeesResponse });
+
+      const result = await client.getWithdrawalFees('TONCOIN');
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/app/withdrawal/fees?currency=TONCOIN');
+      expect(result).toEqual(mockFeesResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+
+      await expect(client.getWithdrawalFees()).rejects.toThrow('API key is required for getting withdrawal fees');
+    });
+
+    it('should handle API errors', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = new Error('Network error');
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getWithdrawalFees()).rejects.toThrow('Network error');
+    });
+
+    it('should handle axios errors with response', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = {
+        response: {
+          status: 400,
+          data: { success: false, message: 'Invalid currency' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getWithdrawalFees('INVALID')).rejects.toMatchObject(mockError);
+    });
+  });
 }); 

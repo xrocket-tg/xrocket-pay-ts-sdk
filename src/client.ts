@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { Version, XRocketPayConfig, CreateInvoiceDto, CreateInvoiceResponse, GetInvoiceResponse, DeleteResponse, PaginationParams, ListInvoicesResponse } from './types';
+import { Version, XRocketPayConfig, CreateInvoiceDto, CreateInvoiceResponse, GetInvoiceResponse, DeleteResponse, PaginationParams, ListInvoicesResponse, AppInfoResponse } from './types';
+import { CreateTransferDto, AppTransferResponse, WithdrawalFeesDto, WithdrawalFeesResponse, CreateWithdrawalDto, AppWithdrawalResponse, WithdrawalStatusDto, WithdrawalStatusResponse } from './types/app';
 
 /**
  * XRocket Pay API Client
@@ -132,5 +133,90 @@ export class XRocketPayClient {
       apiKey: this.config.apiKey,
       timeout: this.config.timeout,
     };
+  }
+
+  /**
+   * Get information about your application
+   * Requires authentication via API key.
+   * 
+   * @returns Promise<AppInfoResponse> The application information
+   * @throws {Error} When API key is not set or request fails
+   */
+  async getAppInfo(): Promise<AppInfoResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for getting app info. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.get<AppInfoResponse>('/app/info');
+    return response.data;
+  }
+
+  /**
+   * Make a transfer of funds to another user
+   * Requires authentication via API key.
+   *
+   * @param transferData The transfer data to create
+   * @returns Promise<AppTransferResponse> The created transfer data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async createTransfer(transferData: CreateTransferDto): Promise<AppTransferResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for creating transfers. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.post<AppTransferResponse>('/app/transfer', transferData);
+    return response.data;
+  }
+
+  /**
+   * Get withdrawal fees for currencies
+   * Requires authentication via API key.
+   *
+   * @param currency Optional currency code to get fees for specific currency
+   * @returns Promise<WithdrawalFeesResponse> The withdrawal fees data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async getWithdrawalFees(currency?: string): Promise<WithdrawalFeesResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for getting withdrawal fees. Use setApiKey() method to set it.');
+    }
+
+    const url = currency ? `/app/withdrawal/fees?currency=${currency}` : '/app/withdrawal/fees';
+    const response = await this.httpClient.get<WithdrawalFeesResponse>(url);
+    return response.data;
+  }
+
+  /**
+   * Create a new withdrawal
+   * Requires authentication via API key.
+   *
+   * @param withdrawalData The withdrawal data to create
+   * @returns Promise<AppWithdrawalResponse> The created withdrawal data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async createWithdrawal(withdrawalData: CreateWithdrawalDto): Promise<AppWithdrawalResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for creating withdrawals. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.post<AppWithdrawalResponse>('/app/withdrawal', withdrawalData);
+    return response.data;
+  }
+
+  /**
+   * Get withdrawal status by ID
+   * Requires authentication via API key.
+   *
+   * @param withdrawalId The withdrawal ID to check status for
+   * @returns Promise<WithdrawalStatusResponse> The withdrawal status data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async getWithdrawalStatus(withdrawalId: string): Promise<WithdrawalStatusResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for getting withdrawal status. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.get<WithdrawalStatusResponse>(`/app/withdrawal/status/${withdrawalId}`);
+    return response.data;
   }
 } 
