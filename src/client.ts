@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Version, XRocketPayConfig, CreateInvoiceDto, CreateInvoiceResponse, GetInvoiceResponse, DeleteResponse, PaginationParams, ListInvoicesResponse, AppInfoResponse } from './types';
 import { CreateTransferDto, AppTransferResponse, WithdrawalFeesDto, WithdrawalFeesResponse, CreateWithdrawalDto, AppWithdrawalResponse, WithdrawalStatusDto, WithdrawalStatusResponse } from './types/app';
+import { CreateChequeDto, SimpleChequeResponse, UpdateChequeDto, PaginatedShortChequeDtoResponse } from './types/multicheque';
 
 /**
  * XRocket Pay API Client
@@ -217,6 +218,101 @@ export class XRocketPayClient {
     }
 
     const response = await this.httpClient.get<WithdrawalStatusResponse>(`/app/withdrawal/status/${withdrawalId}`);
+    return response.data;
+  }
+
+  /**
+   * Create a new multicheque
+   * Requires authentication via API key.
+   * 
+   * @param chequeData The multicheque data to create
+   * @returns Promise<SimpleChequeResponse> The created multicheque data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async createMulticheque(chequeData: CreateChequeDto): Promise<SimpleChequeResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for creating multicheques. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.post<SimpleChequeResponse>('/multi-cheque', chequeData);
+    return response.data;
+  }
+
+  /**
+   * Get multicheque information by ID
+   * Requires authentication via API key.
+   * 
+   * @param id The multicheque ID to retrieve
+   * @returns Promise<SimpleChequeResponse> The multicheque data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async getMulticheque(id: number): Promise<SimpleChequeResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for getting multicheque info. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.get<SimpleChequeResponse>(`/multi-cheque/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Get a paginated list of multicheques
+   * Requires authentication via API key.
+   * 
+   * @param params Pagination parameters (limit, offset)
+   * @returns Promise<PaginatedShortChequeDtoResponse> The paginated list of multicheques
+   * @throws {Error} When API key is not set or request fails
+   */
+  async getMulticheques(params: PaginationParams = {}): Promise<PaginatedShortChequeDtoResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for getting multicheques list. Use setApiKey() method to set it.');
+    }
+
+    const queryParams = new URLSearchParams();
+    if (params.limit !== undefined) {
+      queryParams.append('limit', params.limit.toString());
+    }
+    if (params.offset !== undefined) {
+      queryParams.append('offset', params.offset.toString());
+    }
+
+    const url = `/multi-cheque${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await this.httpClient.get<PaginatedShortChequeDtoResponse>(url);
+    return response.data;
+  }
+
+  /**
+   * Update multicheque information
+   * Requires authentication via API key.
+   * 
+   * @param id The multicheque ID to update
+   * @param updateData The multicheque data to update
+   * @returns Promise<SimpleChequeResponse> The updated multicheque data
+   * @throws {Error} When API key is not set or request fails
+   */
+  async updateMulticheque(id: number, updateData: UpdateChequeDto): Promise<SimpleChequeResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for updating multicheques. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.put<SimpleChequeResponse>(`/multi-cheque/${id}`, updateData);
+    return response.data;
+  }
+
+  /**
+   * Delete multicheque by ID
+   * Requires authentication via API key.
+   * 
+   * @param id The multicheque ID to delete
+   * @returns Promise<DeleteResponse> The delete operation result
+   * @throws {Error} When API key is not set or request fails
+   */
+  async deleteMulticheque(id: number): Promise<DeleteResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('API key is required for deleting multicheques. Use setApiKey() method to set it.');
+    }
+
+    const response = await this.httpClient.delete<DeleteResponse>(`/multi-cheque/${id}`);
     return response.data;
   }
 } 

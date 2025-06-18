@@ -1,7 +1,7 @@
 // Load environment variables from .env file
 import 'dotenv/config';
 
-import { XRocketPayClient } from '../src/client';
+import { XRocketPayClient } from '../../src';
 import { CreateInvoiceDto } from '../src/types';
 
 /**

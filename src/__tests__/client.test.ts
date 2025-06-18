@@ -10,6 +10,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 interface MockAxiosInstance {
   get: jest.Mock;
   post: jest.Mock;
+  put: jest.Mock;
   delete: jest.Mock;
   defaults: {
     headers: Record<string, string>;
@@ -24,6 +25,7 @@ describe('XRocketPayClient', () => {
     mockAxiosInstance = {
       get: jest.fn(),
       post: jest.fn(),
+      put: jest.fn(),
       delete: jest.fn(),
       defaults: {
         headers: {}
@@ -767,6 +769,498 @@ describe('XRocketPayClient', () => {
       mockAxiosInstance.get.mockRejectedValue(mockError);
 
       await expect(client.getWithdrawalFees('INVALID')).rejects.toMatchObject(mockError);
+    });
+  });
+
+  describe('createMulticheque', () => {
+    it('should create a multicheque successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const chequeData = {
+        chequePerUser: 0.01,
+        usersNumber: 1,
+        currency: 'TONCOIN',
+        refProgram: 0,
+        enableCaptcha: false,
+      };
+      const mockChequeResponse = {
+        success: true,
+        data: {
+          id: 413426,
+          currency: 'TONCOIN',
+          total: 0.01,
+          perUser: 0.01,
+          users: 1,
+          password: '',
+          description: '',
+          sendNotifications: true,
+          captchaEnabled: false,
+          refProgramPercents: 0,
+          refRewardPerUser: 0,
+          state: 'active',
+          link: 'https://t.me/xrocket/app?startapp=mc_UrOrlpz5SuublWh',
+          disabledLanguages: [],
+          enabledCountries: [],
+          forPremium: false,
+          forNewUsersOnly: false,
+          linkedWallet: false,
+          tgResources: [],
+          activations: 0,
+          refRewards: 0,
+        }
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockChequeResponse });
+
+      const result = await client.createMulticheque(chequeData);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/multi-cheque', chequeData);
+      expect(result).toEqual(mockChequeResponse);
+    });
+
+    it('should create a multicheque with all optional fields', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const chequeData = {
+        chequePerUser: 0.05,
+        usersNumber: 10,
+        currency: 'TONCOIN',
+        refProgram: 5,
+        password: 'test-password',
+        description: 'Test multicheque',
+        sendNotifications: true,
+        enableCaptcha: true,
+        telegramResourcesIds: ['-1001234567890'],
+        forPremium: false,
+        linkedWallet: true,
+        disabledLanguages: ['RU'],
+        enabledCountries: ['US'],
+      };
+      const mockChequeResponse = {
+        success: true,
+        data: {
+          id: 413427,
+          currency: 'TONCOIN',
+          total: 0.5,
+          perUser: 0.05,
+          users: 10,
+          password: 'test-password',
+          description: 'Test multicheque',
+          sendNotifications: true,
+          captchaEnabled: true,
+          refProgramPercents: 5,
+          refRewardPerUser: 0.0025,
+          state: 'active',
+          link: 'https://t.me/xrocket/app?startapp=mc_TestCheque',
+          disabledLanguages: ['RU'],
+          enabledCountries: ['US'],
+          forPremium: false,
+          forNewUsersOnly: false,
+          linkedWallet: true,
+          tgResources: [],
+          activations: 0,
+          refRewards: 0,
+        }
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockChequeResponse });
+
+      const result = await client.createMulticheque(chequeData);
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/multi-cheque', chequeData);
+      expect(result).toEqual(mockChequeResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+      const chequeData = {
+        chequePerUser: 0.01,
+        usersNumber: 1,
+        refProgram: 0,
+      };
+
+      await expect(client.createMulticheque(chequeData)).rejects.toThrow(
+        'API key is required for creating multicheques. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when creating multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const chequeData = {
+        chequePerUser: 0.01,
+        usersNumber: 1,
+        refProgram: 0,
+      };
+      const mockError = {
+        response: {
+          status: 400,
+          data: { 
+            success: false, 
+            message: 'Bad request',
+            errors: [
+              {
+                property: 'refProgram',
+                error: 'refProgram must not be greater than 100'
+              }
+            ]
+          }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+
+      await expect(client.createMulticheque(chequeData)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/multi-cheque', chequeData);
+    });
+
+    it('should handle network errors when creating multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const chequeData = {
+        chequePerUser: 0.01,
+        usersNumber: 1,
+        refProgram: 0,
+      };
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+
+      await expect(client.createMulticheque(chequeData)).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/multi-cheque', chequeData);
+    });
+  });
+
+  describe('getMulticheque', () => {
+    it('should get multicheque successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockChequeResponse = {
+        success: true,
+        data: {
+          id: 413426,
+          currency: 'TONCOIN',
+          total: 0.01,
+          perUser: 0.01,
+          users: 1,
+          password: '',
+          description: '',
+          sendNotifications: true,
+          captchaEnabled: false,
+          refProgramPercents: 0,
+          refRewardPerUser: 0,
+          state: 'active',
+          link: 'https://t.me/xrocket/app?startapp=mc_UrOrlpz5SuublWh',
+          disabledLanguages: [],
+          enabledCountries: [],
+          forPremium: false,
+          forNewUsersOnly: false,
+          linkedWallet: false,
+          tgResources: [],
+          activations: 0,
+          refRewards: 0,
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockChequeResponse });
+
+      const result = await client.getMulticheque(413426);
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque/413426');
+      expect(result).toEqual(mockChequeResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+
+      await expect(client.getMulticheque(413426)).rejects.toThrow(
+        'API key is required for getting multicheque info. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.get).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when getting multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = {
+        response: {
+          status: 404,
+          data: { success: false, message: 'Cheque not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getMulticheque(999999)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque/999999');
+    });
+
+    it('should handle network errors when getting multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getMulticheque(413426)).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque/413426');
+    });
+
+    it('should handle unauthorized access', async () => {
+      const client = new XRocketPayClient({ apiKey: 'invalid-key' });
+      const mockError = {
+        response: {
+          status: 401,
+          data: { success: false, message: 'Unauthorized' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getMulticheque(413426)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque/413426');
+    });
+  });
+
+  describe('getMulticheques', () => {
+    it('should get multicheques list successfully with API key and default params', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockListResponse = {
+        success: true,
+        data: {
+          total: 5,
+          limit: 100,
+          offset: 0,
+          results: [
+            {
+              id: 413426,
+              currency: 'TONCOIN',
+              total: 0.01,
+              perUser: 0.01,
+              users: 1,
+              description: '',
+              state: 'active',
+              activations: 0,
+            },
+            {
+              id: 413427,
+              currency: 'TONCOIN',
+              total: 0.05,
+              perUser: 0.05,
+              users: 1,
+              description: 'Test cheque',
+              state: 'completed',
+              activations: 1,
+            }
+          ]
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockListResponse });
+
+      const result = await client.getMulticheques();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque');
+      expect(result).toEqual(mockListResponse);
+      expect(result.data.results).toHaveLength(2);
+    });
+
+    it('should get multicheques with pagination parameters', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockListResponse = {
+        success: true,
+        data: {
+          total: 10,
+          limit: 5,
+          offset: 5,
+          results: []
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockListResponse });
+
+      const result = await client.getMulticheques({ limit: 5, offset: 5 });
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque?limit=5&offset=5');
+      expect(result).toEqual(mockListResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+
+      await expect(client.getMulticheques()).rejects.toThrow(
+        'API key is required for getting multicheques list. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.get).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when getting multicheques list', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = {
+        response: {
+          status: 401,
+          data: { success: false, message: 'Unauthorized' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+
+      await expect(client.getMulticheques()).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque');
+    });
+
+    it('should handle empty results', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockListResponse = {
+        success: true,
+        data: {
+          total: 0,
+          limit: 100,
+          offset: 0,
+          results: []
+        }
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockListResponse });
+
+      const result = await client.getMulticheques();
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/multi-cheque');
+      expect(result).toEqual(mockListResponse);
+      expect(result.data.results).toHaveLength(0);
+      expect(result.data.total).toBe(0);
+    });
+  });
+
+  describe('updateMulticheque', () => {
+    it('should update multicheque successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const updateData = {
+        description: 'Updated description',
+        enableCaptcha: false,
+        password: 'new-password',
+      };
+      const mockChequeResponse = {
+        success: true,
+        data: {
+          id: 413426,
+          currency: 'TONCOIN',
+          total: 0.01,
+          perUser: 0.01,
+          users: 1,
+          password: 'new-password',
+          description: 'Updated description',
+          sendNotifications: true,
+          captchaEnabled: false,
+          refProgramPercents: 0,
+          refRewardPerUser: 0,
+          state: 'active',
+          link: 'https://t.me/xrocket/app?startapp=mc_UrOrlpz5SuublWh',
+          disabledLanguages: [],
+          enabledCountries: [],
+          forPremium: false,
+          forNewUsersOnly: false,
+          linkedWallet: false,
+          tgResources: [],
+          activations: 0,
+          refRewards: 0,
+        }
+      };
+      mockAxiosInstance.put.mockResolvedValue({ data: mockChequeResponse });
+
+      const result = await client.updateMulticheque(413426, updateData);
+
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/multi-cheque/413426', updateData);
+      expect(result).toEqual(mockChequeResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+      const updateData = {
+        description: 'Updated description',
+      };
+
+      await expect(client.updateMulticheque(413426, updateData)).rejects.toThrow(
+        'API key is required for updating multicheques. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.put).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when updating multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const updateData = {
+        description: 'Updated description',
+      };
+      const mockError = {
+        response: {
+          status: 404,
+          data: { success: false, message: 'Cheque not found' }
+        }
+      };
+      mockAxiosInstance.put.mockRejectedValue(mockError);
+
+      await expect(client.updateMulticheque(999999, updateData)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/multi-cheque/999999', updateData);
+    });
+
+    it('should handle network errors when updating multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const updateData = {
+        description: 'Updated description',
+      };
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.put.mockRejectedValue(mockError);
+
+      await expect(client.updateMulticheque(413426, updateData)).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/multi-cheque/413426', updateData);
+    });
+  });
+
+  describe('deleteMulticheque', () => {
+    it('should delete multicheque successfully with API key', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockDeleteResponse = {
+        success: true,
+      };
+      mockAxiosInstance.delete.mockResolvedValue({ data: mockDeleteResponse });
+
+      const result = await client.deleteMulticheque(413426);
+
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/multi-cheque/413426');
+      expect(result).toEqual(mockDeleteResponse);
+    });
+
+    it('should throw error when API key is not set', async () => {
+      const client = new XRocketPayClient();
+
+      await expect(client.deleteMulticheque(413426)).rejects.toThrow(
+        'API key is required for deleting multicheques. Use setApiKey() method to set it.'
+      );
+
+      expect(mockAxiosInstance.delete).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors when deleting multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = {
+        response: {
+          status: 404,
+          data: { success: false, message: 'Cheque not found' }
+        }
+      };
+      mockAxiosInstance.delete.mockRejectedValue(mockError);
+
+      await expect(client.deleteMulticheque(999999)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/multi-cheque/999999');
+    });
+
+    it('should handle network errors when deleting multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'test-key' });
+      const mockError = new Error('Network timeout');
+      mockAxiosInstance.delete.mockRejectedValue(mockError);
+
+      await expect(client.deleteMulticheque(413426)).rejects.toThrow('Network timeout');
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/multi-cheque/413426');
+    });
+
+    it('should handle unauthorized access when deleting multicheque', async () => {
+      const client = new XRocketPayClient({ apiKey: 'invalid-key' });
+      const mockError = {
+        response: {
+          status: 401,
+          data: { success: false, message: 'Unauthorized' }
+        }
+      };
+      mockAxiosInstance.delete.mockRejectedValue(mockError);
+
+      await expect(client.deleteMulticheque(413426)).rejects.toMatchObject(mockError);
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/multi-cheque/413426');
     });
   });
 }); 

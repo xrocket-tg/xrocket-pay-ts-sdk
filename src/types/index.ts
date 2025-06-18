@@ -11,4 +11,7 @@ export * from './invoice';
 export * from './webhook'; 
 
 // App types
-export * from './app'; 
+export * from './app';
+
+// Multicheque types
+export * from './multicheque'; 

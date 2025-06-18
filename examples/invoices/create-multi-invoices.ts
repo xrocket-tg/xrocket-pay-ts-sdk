@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { XRocketPayClient } from '../src/client';
+import { XRocketPayClient } from '../../src/client';
 import { CreateInvoiceDto } from '../src/types';
 
 /**

@@ -1,8 +1,8 @@
 // Load environment variables from .env file
 import 'dotenv/config';
 
-import { XRocketPayClient } from '../src/client';
-import { CreateInvoiceDto } from '../src/types';
+import { XRocketPayClient } from '../../src/client';
+import { CreateInvoiceDto } from '../../src/types';
 
 /**
  * Extract useful error information from axios errors

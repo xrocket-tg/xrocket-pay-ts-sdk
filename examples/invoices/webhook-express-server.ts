@@ -9,7 +9,8 @@ import {
   WebhookSignatureError,
   WebhookParseError,
   InvoicePaymentWebhook
-} from '../src';
+} from '../../src';
+import { XRocketPayClient } from '../../src/client';
 
 const app = express();
 

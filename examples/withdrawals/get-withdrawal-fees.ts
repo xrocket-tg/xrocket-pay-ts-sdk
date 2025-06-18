@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { XRocketPayClient } from '../src';
+import { XRocketPayClient } from '../../src/client';
 import { WithdrawalCoinResponseDto } from '../src/types/app';
 
 // Get API key from environment variable

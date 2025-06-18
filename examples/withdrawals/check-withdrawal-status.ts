@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { XRocketPayClient } from '../src/client';
+import { XRocketPayClient } from '../../src/client';
 
 async function main() {
   // Get API key and withdrawal ID from environment variables

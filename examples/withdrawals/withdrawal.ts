@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { XRocketPayClient } from '../src/client';
+import { XRocketPayClient } from '../../src/client';
 import { CreateWithdrawalDto } from '../src/types/app';
 
 async function main() {
