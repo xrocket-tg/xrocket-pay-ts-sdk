@@ -26,4 +26,6 @@ coverage/
 
 # Documentation
 README.md
-LICENSE 
+LICENSE
+
+.cursor 

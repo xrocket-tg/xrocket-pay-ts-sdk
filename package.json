@@ -1,12 +1,14 @@
 {
   "name": "xrocket-pay-api-sdk",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "TypeScript SDK for xRocket Pay API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns=e2e",
+    "test:e2e": "jest --testPathPattern=e2e",
     "dev": "tsc --watch",
     "example:invoice:create": "ts-node examples/invoices/create-invoice.ts",
     "example:invoice:get": "ts-node examples/invoices/get-invoice.ts",
