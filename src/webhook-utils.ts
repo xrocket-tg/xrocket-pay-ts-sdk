@@ -157,6 +157,7 @@ export function extractPaymentInfo(webhook: InvoicePaymentWebhook) {
     status: data.status,
     userId: data.payment.userId,
     paymentAmount: data.payment.paymentAmount,
+    paymentAmountReceived: data.payment.paymentAmountReceived,
     paymentNumber: data.payment.paymentNum,
     paidAt: data.payment.paid,
     comment: data.payment.comment || undefined,
