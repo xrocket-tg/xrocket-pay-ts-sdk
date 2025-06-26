@@ -1,6 +1,6 @@
 {
   "name": "xrocket-pay-api-sdk",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "TypeScript SDK for xRocket Pay API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
