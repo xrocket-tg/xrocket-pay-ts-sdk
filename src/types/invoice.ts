@@ -76,6 +76,8 @@ export interface PayInvoiceStatDto {
   paymentNum: number;
   /** Amount of payments in transaction */
   paymentAmount: number;
+  /** Amount received by app without fee */
+  paymentAmountReceived: number;
   /** Comment on payment */
   comment: string;
   /** When transaction was paid */
